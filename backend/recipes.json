@@ -29,6 +29,7 @@
   {"name": "涼拌小黃瓜", "category": "家常菜", "ingredients": ["小黃瓜", "蒜", "鹽"], "steps": ["切片", "拌"]},
   {"name": "炒蛋", "category": "家常菜", "ingredients": ["蛋", "鹽"], "steps": ["打蛋", "炒熟"]},
   {"name": "煎餃", "category": "家常菜", "ingredients": ["水餃", "油"], "steps": ["煎餃", "加水悶熟"]},
+
   {"name": "蔥爆牛肉", "category": "家常菜", "ingredients": ["牛肉", "蔥", "醬油"], "steps": ["爆炒牛肉", "加入蔥"]},
   {"name": "蒜香蝦仁", "category": "家常菜", "ingredients": ["蝦", "蒜", "油"], "steps": ["爆香蒜", "炒蝦"]},
   {"name": "清炒青江菜", "category": "家常菜", "ingredients": ["青江菜", "蒜", "鹽"], "steps": ["爆香蒜", "快炒"]},
@@ -49,7 +50,7 @@
   {"name": "蔥油拌麵", "category": "家常菜", "ingredients": ["麵條", "蔥", "油", "醬油"], "steps": ["煮麵", "拌蔥油醬"]},
   {"name": "炒牛肉米粉", "category": "家常菜", "ingredients": ["米粉", "牛肉", "青菜"], "steps": ["炒牛肉", "加入米粉"]},
   {"name": "洋蔥蝦仁炒蛋", "category": "家常菜", "ingredients": ["蝦", "洋蔥", "蛋"], "steps": ["爆香洋葱", "加蝦蛋炒"]},
-  
+
   {"name": "香蕉蜂蜜優格杯", "category": "甜點", "ingredients": ["香蕉", "優格", "蜂蜜"], "steps": ["香蕉切片", "與優格分層裝杯", "淋上蜂蜜"]},
 {"name": "藍莓燕麥烤粥", "category": "甜點", "ingredients": ["藍莓", "燕麥", "鮮奶", "砂糖"], "steps": ["混合所有材料", "倒入烤皿", "烤至表面金黃"]},
 {"name": "南瓜牛奶布丁", "category": "甜點", "ingredients": ["南瓜", "鮮奶", "砂糖", "蛋黃"], "steps": ["南瓜蒸軟打泥", "與奶液混合", "隔水蒸至凝固"]},
