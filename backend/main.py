@@ -1,25 +1,51 @@
 from fastapi import FastAPI, Query
 from typing import List, Optional
 import random
+import json
+import os
 from database import load_recipes
 
 app = FastAPI(
     title="食譜查詢 API",
-    version="2.1.0",
-    description="支援分類、複選食材、模糊搜尋的食譜 API"
+    version="2.2.0",
+    description="支援分類、複選食材、模糊搜尋，並提供收藏功能的食譜 API"
 )
 
+# =========================
 # 載入食譜資料
+# =========================
 recipes = load_recipes()
 
+# =========================
+# 收藏功能（JSON 儲存）
+# =========================
+FAVORITE_FILE = "favorites.json"
 
+
+def load_favorites():
+    if not os.path.exists(FAVORITE_FILE):
+        return set()
+    with open(FAVORITE_FILE, "r", encoding="utf-8") as f:
+        return set(json.load(f))
+
+
+def save_favorites(favorites: set):
+    with open(FAVORITE_FILE, "w", encoding="utf-8") as f:
+        json.dump(list(favorites), f, ensure_ascii=False, indent=2)
+
+
+favorites = load_favorites()
+
+# =========================
+# 首頁
+# =========================
 @app.get("/")
 def root():
-    return {"message": "歡迎使用強化版食譜查詢 API！"}
+    return {"message": "歡迎使用強化版食譜查詢 API！（含收藏功能）"}
 
 
 # =========================
-# 搜尋功能（重點）
+# 搜尋功能（原本功能）
 # =========================
 @app.get(
     "/search",
@@ -55,7 +81,7 @@ def search_recipes(
     )
 ):
     result = recipes
-    fuzzy_hit_count = 0  # 模糊搜尋命中次數
+    fuzzy_hit_count = 0
 
     # 1️⃣ 分類篩選
     if category:
@@ -70,7 +96,6 @@ def search_recipes(
             local_hit = 0
 
             for q in ingredient:
-                # 只要關鍵字出現在任一食材中就算命中
                 if any(q in ing for ing in recipe["ingredients"]):
                     local_hit += 1
                 else:
@@ -78,10 +103,20 @@ def search_recipes(
                     break
 
             if matched_all:
-                filtered.append(recipe)
+                # ⭐ 加上是否已收藏（加分）
+                recipe_copy = recipe.copy()
+                recipe_copy["is_favorite"] = recipe["name"] in favorites
+
+                filtered.append(recipe_copy)
                 fuzzy_hit_count += local_hit
 
         result = filtered
+    else:
+        # 沒搜尋條件時也標示是否收藏
+        result = [
+            {**r, "is_favorite": r["name"] in favorites}
+            for r in result
+        ]
 
     return {
         "category": category,
@@ -93,16 +128,23 @@ def search_recipes(
 
 
 # =========================
-# 其他 API
+# 其他原本 API
 # =========================
 @app.get("/list", summary="列出全部食譜")
 def list_recipes():
-    return {"count": len(recipes), "recipes": recipes}
+    return {
+        "count": len(recipes),
+        "recipes": [
+            {**r, "is_favorite": r["name"] in favorites}
+            for r in recipes
+        ]
+    }
 
 
 @app.get("/random", summary="隨機推薦一道食譜")
 def random_recipe():
-    return random.choice(recipes)
+    recipe = random.choice(recipes)
+    return {**recipe, "is_favorite": recipe["name"] in favorites}
 
 
 @app.get("/detail", summary="依完整名稱查詢食譜")
@@ -111,5 +153,45 @@ def recipe_detail(
 ):
     for r in recipes:
         if r["name"] == name:
-            return r
+            return {**r, "is_favorite": name in favorites}
     return {"error": f"找不到名為 {name} 的食譜"}
+
+
+# =========================
+# 收藏 API（新增）
+# =========================
+@app.post("/favorite", summary="收藏一份食譜")
+def add_favorite(
+    name: str = Query(..., description="要收藏的食譜名稱")
+):
+    for r in recipes:
+        if r["name"] == name:
+            favorites.add(name)
+            save_favorites(favorites)
+            return {
+                "message": f"已收藏：{name}",
+                "favorites_count": len(favorites)
+            }
+
+    return {"error": f"找不到名為 {name} 的食譜"}
+
+
+@app.get("/favorite", summary="查看收藏的食譜")
+def list_favorites():
+    result = [r for r in recipes if r["name"] in favorites]
+    return {
+        "count": len(result),
+        "favorites": result
+    }
+
+
+@app.delete("/favorite", summary="取消收藏")
+def remove_favorite(
+    name: str = Query(..., description="要取消收藏的食譜名稱")
+):
+    if name in favorites:
+        favorites.remove(name)
+        save_favorites(favorites)
+        return {"message": f"已取消收藏：{name}"}
+
+    return {"error": f"{name} 不在收藏清單中"}
