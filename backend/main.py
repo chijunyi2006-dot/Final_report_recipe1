@@ -1,5 +1,7 @@
 from fastapi import FastAPI, Query
+from fastapi.middleware.cors import CORSMiddleware
 from typing import List, Optional
+from fastapi.middleware.cors import CORSMiddleware
 import random
 import json
 import os
@@ -11,6 +13,27 @@ app = FastAPI(
     description="支援分類、複選食材、模糊搜尋，並提供收藏功能的食譜 API"
 )
 
+<<<<<<< HEAD
+=======
+
+# 這段一定要加，前端才拿得到資料
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"], 
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+@app.get("/data")
+def get_info():
+    return {"msg": "連線成功！這是來自後端的資料"}
+
+
+@app.get("/data")
+def get_info():
+    return {"msg": "連線成功！這是來自後端的資料"}
+
+>>>>>>> 5320946 (Front-end)
 # =========================
 # 載入食譜資料
 # =========================
@@ -85,7 +108,19 @@ def search_recipes(
 
     # 1️⃣ 分類篩選
     if category:
-        result = [r for r in result if r["category"] == category]
+        # 定義對照表：讓 home 也能對應到 中文「家常菜」
+        category_map = {
+            "home": ["home", "家常菜"],
+            "dessert": ["dessert", "甜點"]
+        }
+        
+        target_tags = category_map.get(category.lower(), [category])
+        
+        # 只要資料庫裡的 category 屬於 target_tags 其中之一，就留下來
+        result = [
+            r for r in result 
+            if str(r.get("category")).lower() in target_tags
+        ]
 
     # 2️⃣ 多食材 + 模糊搜尋
     if ingredient:
@@ -194,4 +229,8 @@ def remove_favorite(
         save_favorites(favorites)
         return {"message": f"已取消收藏：{name}"}
 
+<<<<<<< HEAD
     return {"error": f"{name} 不在收藏清單中"}
+=======
+    return {"error": f"{name} 不在收藏清單中"}
+>>>>>>> 5320946 (Front-end)
