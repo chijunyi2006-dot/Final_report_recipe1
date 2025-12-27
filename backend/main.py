@@ -30,7 +30,7 @@ app.add_middleware(
 # 檔案路徑設定 (支援 Zeabur Volume)
 # =========================
 # 優先搜尋 Zeabur 的持久化空間 /data
-STORAGE_PATH = "/data" if os.path.exists("/data") else "."
+STORAGE_PATH = "/data" if os.path.isdir("/data") else "."
 FAVORITE_FILE = os.path.join(STORAGE_PATH, "favorites.json")
 
 
